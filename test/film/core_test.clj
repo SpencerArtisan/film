@@ -55,10 +55,10 @@
   (testing 
     (is (= [{:rating 6.0}] (ratings-above [{:rating 6.0}, {:rating 4.0}] 5.0)))))
 
-(deftest film-filter-test
+(deftest filter-relevant-test
   (testing 
     (is (= [{:votes 2000, :extra ""}] 
-           (film-filter [{:votes 2000, :extra ""} {:votes 3000, :extra "(VG)"} {:votes 10, :extra ""}])))))
+           (filter-relevant [{:votes 2000, :extra ""} {:votes 3000, :extra "(VG)"} {:votes 10, :extra ""}])))))
 
 (deftest row->map-test
   (testing 

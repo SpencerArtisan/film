@@ -46,13 +46,17 @@
   [film]
   (and (:votes film) (> (:votes film) 1000)))
 
+(defn is-relevant
+  [film]
+  (and (is-film film) (is-enough-votes film)))
+
 (defn ratings-above
   [films rating]
   (filter #(is-rating-above % rating) films))
 
-(defn film-filter
+(defn filter-relevant
   [films]
-  (filter #(and (is-film %) (is-enough-votes %)) films))
+  (filter #(is-relevant %) films))
 
 (defn row->map
   [unmapped-row]
@@ -73,11 +77,11 @@
 
 (defn films
   []
-  (film-filter (mapify (parse (raw-data)))))
+  (filter-relevant (mapify (parse (raw-data)))))
 
 (defn pretty
   [film]
-  (str (:title film) " (" (:rating film) ")" (:extra film)))
+  (str (:rating film) "   " (:title film) " (" (:year film) ")" (:extra film)))
 
 (defn command-r
   [args]
@@ -90,6 +94,6 @@
   [& args]
   (println 
     (if (= "-r" (first args))
-    (command-r args)
-    "Unknown switch. USAGE: -r minimum-rating"))
+      (command-r args)
+      "Unknown switch. USAGE: -r minimum-rating"))
 )
