@@ -1,6 +1,8 @@
 (ns film.core
   (:gen-class))
 
+(require '[clojure.core.match :refer [match]])
+
 (def ratings-keys [:votes :rating :title :year :extra])
 
 (defn str->int [str] (Integer. str))
@@ -34,7 +36,7 @@
 
 (defn is-rating-above
   [film rating]
-  (and (:rating film) (> (:rating film) rating)))
+  (and (:rating film) (>= (:rating film) rating)))
 
 (defn is-film
   [film]
@@ -56,7 +58,7 @@
 
 (defn filter-relevant
   [films]
-  (filter #(is-relevant %) films))
+  (filter is-relevant films))
 
 (defn row->map
   [unmapped-row]
@@ -77,23 +79,22 @@
 
 (defn films
   []
-  (filter-relevant (mapify (parse (raw-data)))))
+  (sort-by :title (filter-relevant (mapify (parse (raw-data))))))
 
 (defn pretty
   [film]
   (str (:rating film) "   " (:title film) " (" (:year film) ")" (:extra film)))
 
 (defn command-r
-  [args]
+  [rating]
     (str 
-      "Films with rating above " (second args) ":\n"
-      (clojure.string/join "\n" (map pretty (ratings-above (films) (str->float (second args)))))))
-
+      "Films with rating above " rating ":\n"
+      (clojure.string/join "\n" (map pretty (ratings-above (films) (str->float rating))))))
 
 (defn -main
   [& args]
   (println 
-    (if (= "-r" (first args))
-      (command-r args)
-      "Unknown switch. USAGE: -r minimum-rating"))
+    (match (into [] args)
+      ["-r" rating] (command-r "9.4")
+      :else "Unknown switch. USAGE: -r minimum-rating"))
 )
