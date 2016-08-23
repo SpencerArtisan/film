@@ -2,6 +2,7 @@
   (:gen-class))
 
 (require '[clojure.core.match :refer [match]])
+(require '[clojure.string :refer [split-lines trim includes? join]])
 
 (def ratings-keys [:votes :rating :title :year :extra])
 
@@ -22,13 +23,13 @@
 
 (defn rows
   [string]
-  (clojure.string/split-lines string))
+  (split-lines string))
 
 (def row-pattern #"^\s+(\S+)\s+(\S+)\s+(\S+)\s+\"?(.+?)\"?\s+\((\d+)\)(.*)")
 
 (defn parse-row 
   [string]
-  (map clojure.string/trim (drop 2 (re-find row-pattern string))))
+  (map trim (drop 2 (re-find row-pattern string))))
 
 (defn parse
   [string]
@@ -36,7 +37,7 @@
 
 (defn is-title
   [film title]
-  (and (:title film) (= (clojure.string/upper-case (:title film)) (clojure.string/upper-case title))))
+  (and (:title film) (re-find (re-pattern (str "(?i)" title)) (:title film)))) 
 
 (defn is-rating-above
   [film rating]
@@ -46,7 +47,7 @@
   [film]
    (and
      (:extra film)
-     (not-any? #(clojure.string/includes? (:extra film) %) '("{", "TV", "VG", "V"))))
+     (not-any? #(includes? (:extra film) %) '("{", "TV", "VG", "V"))))
 
 (defn is-enough-votes
   [film]
@@ -97,11 +98,11 @@
   [rating]
     (str 
       "Films with rating above " rating ":\n"
-      (clojure.string/join "\n" (map pretty (ratings-above (films) (str->float rating))))))
+      (join "\n" (map pretty (ratings-above (films) (str->float rating))))))
 
 (defn command-search
   [title]
-      (clojure.string/join "\n" (map pretty (titles-matching (films) title))))
+      (join "\n" (map pretty (titles-matching (films) title))))
 
 (defn -main
   [& args]

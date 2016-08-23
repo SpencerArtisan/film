@@ -49,6 +49,7 @@
   (testing 
     (is (is-title {:title "title"} "title"))
     (is (is-title {:title "Title"} "title"))
+    (is (is-title {:title "Title"} "ti"))
     (is (not (is-title {:title "other"} "title")))))
 
 (deftest is-enough-votes-test
