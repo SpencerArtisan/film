@@ -32,43 +32,47 @@
   [string]
   (map trim (drop 2 (re-find row-pattern string))))
 
+(defn parse-row 
+  [string]
+  (map trim (drop 2 (re-find row-pattern string))))
+
 (defn parse-file
   [string]
   (map parse-row (rows string)))
 
-(defn is-title
+(defn is-title?
   [film title]
   (and (:title film) (re-find (re-pattern (str "(?i)" title)) (:title film)))) 
 
-(defn is-rating-above
+(defn is-rating-above?
   [film rating]
   (and (:rating film) (>= (:rating film) rating)))
 
-(defn is-film
+(defn is-film?
   [film]
    (and
      (:extra film)
      (not-any? #(includes? (:extra film) %) '("{", "TV", "VG", "V"))))
 
-(defn is-enough-votes
+(defn is-enough-votes?
   [film]
   (and (:votes film) (> (:votes film) 1000)))
 
-(defn is-relevant
+(defn is-relevant?
   [film]
-  (and (is-film film) (is-enough-votes film)))
+  (and (is-film? film) (is-enough-votes? film)))
 
 (defn titles-matching
   [films title]
-  (filter #(is-title % title) films))
+  (filter #(is-title? % title) films))
 
 (defn ratings-above
   [films rating]
-  (filter #(is-rating-above % rating) films))
+  (filter #(is-rating-above? % rating) films))
 
 (defn filter-relevant
   [films]
-  (filter is-relevant films))
+  (filter is-relevant? films))
 
 (defn row->map
   [unmapped-row]

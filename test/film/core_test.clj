@@ -33,30 +33,30 @@
 
 (deftest is-film-test
   (testing 
-    (is (is-film {:extra ""})))
-    (is (not (is-film {:extra "(VG)"})))
-    (is (not (is-film {:extra "(V)"})))
-    (is (not (is-film {:extra "(TV)"})))
-    (is (not (is-film {})))
-    (is (not (is-film {:extra "{}"}))))
+    (is (is-film? {:extra ""})))
+    (is (not (is-film? {:extra "(VG)"})))
+    (is (not (is-film? {:extra "(V)"})))
+    (is (not (is-film? {:extra "(TV)"})))
+    (is (not (is-film? {})))
+    (is (not (is-film? {:extra "{}"}))))
 
 (deftest is-rating-above-test
   (testing 
-    (is (is-rating-above {:rating 6.0} 5.0)))
-    (is (not (is-rating-above {:rating 4.0} 5.0))))
+    (is (is-rating-above? {:rating 6.0} 5.0)))
+    (is (not (is-rating-above? {:rating 4.0} 5.0))))
 
 (deftest is-title-test
   (testing 
-    (is (is-title {:title "title"} "title"))
-    (is (is-title {:title "Title"} "title"))
-    (is (is-title {:title "Title"} "ti"))
-    (is (not (is-title {:title "other"} "title")))))
+    (is (is-title? {:title "title"} "title"))
+    (is (is-title? {:title "Title"} "title"))
+    (is (is-title? {:title "Title"} "ti"))
+    (is (not (is-title? {:title "other"} "title")))))
 
 (deftest is-enough-votes-test
   (testing 
-    (is (is-enough-votes {:votes 2000}))
-    (is (not (is-enough-votes {})))
-    (is (not (is-enough-votes {:votes 100})))))
+    (is (is-enough-votes? {:votes 2000}))
+    (is (not (is-enough-votes? {})))
+    (is (not (is-enough-votes? {:votes 100})))))
 
 (deftest ratings-above-test
   (testing 
