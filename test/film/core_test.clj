@@ -45,6 +45,12 @@
     (is (is-rating-above {:rating 6.0} 5.0)))
     (is (not (is-rating-above {:rating 4.0} 5.0))))
 
+(deftest is-title-test
+  (testing 
+    (is (is-title {:title "title"} "title"))
+    (is (is-title {:title "Title"} "title"))
+    (is (not (is-title {:title "other"} "title")))))
+
 (deftest is-enough-votes-test
   (testing 
     (is (is-enough-votes {:votes 2000}))

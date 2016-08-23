@@ -34,6 +34,10 @@
   [string]
   (map parse-row (rows string)))
 
+(defn is-title
+  [film title]
+  (and (:title film) (= (clojure.string/upper-case (:title film)) (clojure.string/upper-case title))))
+
 (defn is-rating-above
   [film rating]
   (and (:rating film) (>= (:rating film) rating)))
@@ -51,6 +55,10 @@
 (defn is-relevant
   [film]
   (and (is-film film) (is-enough-votes film)))
+
+(defn titles-matching
+  [films title]
+  (filter #(is-title % title) films))
 
 (defn ratings-above
   [films rating]
@@ -91,10 +99,15 @@
       "Films with rating above " rating ":\n"
       (clojure.string/join "\n" (map pretty (ratings-above (films) (str->float rating))))))
 
+(defn command-search
+  [title]
+      (clojure.string/join "\n" (map pretty (titles-matching (films) title))))
+
 (defn -main
   [& args]
   (println 
     (match (into [] args)
-      ["-r" rating] (command-r "9.4")
-      :else "Unknown switch. USAGE: -r minimum-rating"))
+      ["-r" rating] (command-r rating)
+      [title] (command-search title)
+      :else "Unknown switch. USAGES:\n name: searches for move\n -r minimum-rating movies with ratings equal to or above"))
 )
