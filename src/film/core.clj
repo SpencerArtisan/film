@@ -32,7 +32,7 @@
   [string]
   (map trim (drop 2 (re-find row-pattern string))))
 
-(defn parse
+(defn parse-file
   [string]
   (map parse-row (rows string)))
 
@@ -89,7 +89,7 @@
 
 (defn films
   []
-  (sort-by :title (filter-relevant (mapify (parse (raw-data))))))
+  (sort-by :title (filter-relevant (mapify (parse-file (raw-data))))))
 
 (defn films-or-cache
   []

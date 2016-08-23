@@ -26,10 +26,10 @@
   (testing 
     (is (= '("5973", "7.9", "Pygmalion", "1938", "") (parse-row "      0000001311    5973   7.9  Pygmalion (1938)")))))
 
-(deftest parse-test
+(deftest parse-file-test
   (testing 
     (is (= '(("5973", "7.9", "Pygmalion", "1938", ""), ("3518", "7.5", "The Bedford Incident", "1965", "")) 
-           (parse "      0000001311    5973   7.9  Pygmalion (1938)\n      0000012310    3518   7.5  The Bedford Incident (1965)")))))
+           (parse-file "      0000001311    5973   7.9  Pygmalion (1938)\n      0000012310    3518   7.5  The Bedford Incident (1965)")))))
 
 (deftest is-film-test
   (testing 
