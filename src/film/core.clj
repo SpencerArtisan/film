@@ -49,7 +49,9 @@
 
 (defn is-title?
   [film title]
-  (and (:title film) (re-find (re-pattern (str "(?i)" title)) (:title film)))) 
+  (let [film-title (:title film) 
+        pattern (re-pattern (str "(?i)" title))]
+    (and film-title (re-find pattern film-title)))) 
 
 (defn is-rating-above?
   [film rating]
@@ -59,7 +61,7 @@
   [film]
    (and
      (:extra film)
-     (not-any? #(includes? (:extra film) %) '("{", "TV", "VG", "V"))))
+     (not-any? #(includes? (:extra film) %) '("{", "(TV)", "(VG)"))))
 
 ;(defn is-enough-votes?
 ;  [film]
