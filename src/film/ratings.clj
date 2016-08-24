@@ -59,7 +59,7 @@
   [film]
    (and
      (:extra film)
-     (not-any? #(includes? (:extra film) %) '("{", "(TV)", "(VG)"))))
+     (not-any? #(includes? (:extra film) %) '("{", "(V)", "(TV)", "(VG)"))))
 
 ;(defn is-enough-votes?
 ;  [film]

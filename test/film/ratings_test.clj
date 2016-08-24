@@ -1,6 +1,6 @@
-(ns film.core-test
+(ns film.ratings-test
   (:require [clojure.test :refer :all]
-            [film.core :refer :all]))
+            [film.ratings :refer :all]))
 
 (deftest convert-title-test
   (testing 
