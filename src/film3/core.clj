@@ -12,6 +12,7 @@
 (defn find2 [url]                     (clj-http.client/get url {:as :json}))
 
 (defn pretty-film-detail [film]       (format "%s\nRating: %.1f\n\n%s\n\nhttp://www.imdb.com/title/%s" (:title film) (float (:vote_average film)) (:overview film) (:imdb_id film)))
+(defn pretty-person-detail [person]       (format "%s\n%s - %s\n%s" (:name person) (:birthday person) (:deathday person) (:biography person)))
 (defn pretty-film [film]              (format "%-40s%.1f%10s" (:title film) (float (:vote_average film)) (:id film)))
 (defn pretty-person [person]          (format "%-40s%10s" (:name person) (:id person) ))
 (defn pretty-character [character]    (format "%-40s%-80s%10s" (:name character) (:character character) (:id character)))
@@ -25,6 +26,7 @@
 (defn actor-films [person-id]         (:cast (:body (find2 (noun-url "person" person-id "movie_credits")))))
 (defn director-films [person-id]      (filter #(= "Director" (:job %)) (:crew (:body (find2 (noun-url "person" person-id "movie_credits"))))))
 (defn film [film-id]                  (:body (find2 (noun-url2 "movie" film-id))))
+(defn person [person-id]              (:body (find2 (noun-url2 "person" person-id))))
 
 (defn print-films [title]                 (prettify (films title) pretty-film))
 (defn print-persons [name]                (prettify (people name) pretty-person))
@@ -32,7 +34,9 @@
 (defn print-film-detail [film-id]         (println (pretty-film-detail (film film-id))) (println "\nCast:\n") (print-characters film-id))
 (defn print-actor-films [person-id]       (prettify (actor-films person-id) pretty-actor-film))
 (defn print-director-films [person-id]    (prettify (director-films person-id) pretty-director-film))
-(defn print-person-films [person-id]      (print-actor-films person-id) (print-director-films person-id))
+(defn print-person-detail [person-id]     (println (pretty-person-detail (person person-id))) 
+                                          (println "\nActed in:\n") (print-actor-films person-id)
+                                          (println "\nDirected:\n") (print-director-films person-id))
 
 (search-url "movie" "bedford")
 
@@ -52,7 +56,7 @@
   (def prompt (case subject "f" "> Enter film id" "p" "> Enter person id"))
   (println prompt)
   (def id (read-line))
-  (def finder (case subject "f" print-film-detail "p" print-person-films))
+  (def finder (case subject "f" print-film-detail "p" print-person-detail))
   (finder id)
   (recur)
 )
