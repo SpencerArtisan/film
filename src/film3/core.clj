@@ -1,47 +1,10 @@
 (ns film3.core
-  (:require [clj-http.client :as www])
+  (:require [film3.find])
   (:require [film3.pretty])
-  (:require [film3.urls])
   (:gen-class))
 
-(refer 'film3.urls)
+(refer 'film3.find)
 (refer 'film3.pretty)
-
-(defn results
-  [response]
-  (:results (:body response)))
-
-(defn find2
-  [url]
-  (clj-http.client/get url {:as :json}))
-
-(defn films
-  [title]
-  (:results (:body (find2 (search-url "movie" title)))))
-
-(defn people
-  [name]
-  (:results (:body (find2 (search-url "person" name)))))
-
-(defn characters
-  [film-id]
-  (take 8 (:cast (:body (find2 (noun-url "movie" film-id "credits"))))))
-
-(defn actor-films
-  [person-id]
-  (:cast (:body (find2 (noun-url "person" person-id "movie_credits")))))
-
-(defn director-films
-  [person-id]
-  (filter #(= "Director" (:job %)) (:crew (:body (find2 (noun-url "person" person-id "movie_credits"))))))
-
-(defn film
-  [film-id]
-  (:body (find2 (noun-url2 "movie" film-id))))
-
-(defn person
-  [person-id]
-  (:body (find2 (noun-url2 "person" person-id))))
 
 (defn print-films
   [title]
@@ -73,8 +36,6 @@
   (println "\nActed in:\n") (print-actor-films person-id)
   (println "\nDirected:\n") (print-director-films person-id))
 
-(search-url "movie" "bedford")
-
 (defn from-name []
   (println "> Film (f) or Person (p)?")
   (let [subject (read-line)
@@ -86,17 +47,14 @@
 
 (defn from-id []
   (println "> Film (f) or Person (p)?")
-  (def subject (read-line))
-  (def prompt (case subject "f" "> Enter film id" "p" "> Enter person id"))
-  (println prompt)
-  (def id (read-line))
-  (def finder (case subject "f" print-film-detail "p" print-person-detail))
-  (finder id)
-  (recur)
-  )
+  (let [subject (read-line)
+        prompt (case subject "f" "> Enter film id" "p" "> Enter person id")
+        _ (println prompt)
+        id (read-line)
+        finder (case subject "f" print-film-detail "p" print-person-detail)]
+    (finder id)
+    (recur)))
 
 (defn -main [& args]
   (from-name)
-  (from-id)
-  )
-
+  (from-id))
