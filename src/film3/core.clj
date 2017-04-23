@@ -1,41 +1,46 @@
 (ns film3.core
   (:require [film3.find])
   (:require [film3.pretty])
-  (:require [lanterna.screen :as s])
+  (:require [clojure.string :as string])
   (:gen-class))
 
 (refer 'film3.find)
 (refer 'film3.pretty)
 
-(defn print-films
-  [title]
-  (prettify (films title) pretty-film))
+(def print-films
+  (comp sort (partial map pretty-film) films))
 
-(defn print-persons
-  [name]
-  (prettify (people name) pretty-person))
+(def print-persons
+  (comp sort (partial map pretty-person) people))
 
-(defn print-characters
-  [film-id]
-  (prettify (characters film-id) pretty-character))
+(def print-characters
+  (comp sort (partial map pretty-character) characters))
+
+(def print-actor-films
+  (comp sort (partial map pretty-actor-film) actor-films))
+
+(def print-director-films
+  (comp sort (partial map pretty-director-film) director-films))
 
 (defn print-film-detail
   [film-id]
-  (println (pretty-film-detail (film film-id))) (println "\nCast:\n") (print-characters film-id))
-
-(defn print-actor-films
-  [person-id]
-  (prettify (actor-films person-id) pretty-actor-film))
-
-(defn print-director-films
-  [person-id]
-  (prettify (director-films person-id) pretty-director-film))
+  (flatten (list
+      (pretty-film-detail (film film-id))
+      "Cast:"
+      (print-characters film-id))))
 
 (defn print-person-detail
   [person-id]
-  (println (pretty-person-detail (person person-id))) 
-  (println "\nActed in:\n") (print-actor-films person-id)
-  (println "\nDirected:\n") (print-director-films person-id))
+  (flatten (list
+      (pretty-person-detail (person person-id))
+      "Acted in:"
+      (print-actor-films person-id)
+      "Directed:" 
+      (print-director-films person-id))))
+
+(defn dump
+  [lines]
+  (println (string/join "\n" lines)))
 
 (defn from-name []
   (println "> Film (f) or Person (p)?")
@@ -44,7 +49,7 @@
         _ (println prompt)
         name (read-line)
         finder (case subject "f" print-films "p" print-persons)]
-    (finder name)))
+    (dump (finder name))))
 
 (defn from-id []
   (println "> Film (f) or Person (p)?")
@@ -53,7 +58,7 @@
         _ (println prompt)
         id (read-line)
         finder (case subject "f" print-film-detail "p" print-person-detail)]
-    (finder id)
+    (dump (finder id))
     (recur)))
 
 (defn -main [& args]

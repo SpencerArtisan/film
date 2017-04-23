@@ -51,8 +51,3 @@
           (:title film)
           (:id film)))
 
-(defn prettify
-  [data formatter]
-  (println (clojure.string/join "\n" (sort (map formatter data)))))
-
-(pretty-person {:name 1 :id 2})
