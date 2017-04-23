@@ -1,6 +1,7 @@
 (ns film3.core
   (:require [film3.find])
   (:require [film3.pretty])
+  (:require [lanterna.screen :as s])
   (:gen-class))
 
 (refer 'film3.find)
