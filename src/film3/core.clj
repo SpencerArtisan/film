@@ -1,6 +1,11 @@
 (ns film3.core
   (:require [clj-http.client :as www])
+  (:require [film3.pretty])
+  (:require [film3.urls])
   (:gen-class))
+
+(refer 'film3.urls)
+(refer 'film3.pretty)
 
 (defn results
   [response]
@@ -77,7 +82,7 @@
         _ (println prompt)
         name (read-line)
         finder (case subject "f" print-films "p" print-persons)]
-    (finder name))
+    (finder name)))
 
 (defn from-id []
   (println "> Film (f) or Person (p)?")
