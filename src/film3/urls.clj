@@ -11,7 +11,7 @@
   (str root-url (string/join "/" parts) "?" api-key))
 
 (defn search-url
-  "Build a url for nouns"
-  [type query]
-  (str (rest-url "search" type) "&query=" query))
+  "Build a url for a restful search of a given noun"
+  [noun query]
+  (str (rest-url "search" noun) "&query=" query))
 
