@@ -1,9 +1,11 @@
 (ns film3.core
   (:require [film3.find])
   (:require [film3.pretty])
+  (:require [film3.ui])
   (:require [clojure.string :as string])
   (:gen-class))
 
+(refer 'film3.ui)
 (refer 'film3.find)
 (refer 'film3.pretty)
 
@@ -42,25 +44,26 @@
   [lines]
   (println (string/join "\n" lines)))
 
-(defn from-name []
-  (println "> Film (f) or Person (p)?")
-  (let [subject (read-line)
-        prompt (case subject "f" "> Enter film name" "p" "> Enter person name")
-        _ (println prompt)
-        name (read-line)
-        finder (case subject "f" print-films "p" print-persons)]
-    (dump (finder name))))
+(defn from-name 
+  []
+  (let [subject (tinchar "> Film (f) or Person (p)?")
+        prompt (case subject \f "> Enter film name" \p "> Enter person name")
+        name (tin prompt)
+        finder (case subject \f print-films \p print-persons)]
+    (tdump (finder name))))
 
-(defn from-id []
+(defn from-id 
+  []
   (println "> Film (f) or Person (p)?")
   (let [subject (read-line)
         prompt (case subject "f" "> Enter film id" "p" "> Enter person id")
         _ (println prompt)
         id (read-line)
         finder (case subject "f" print-film-detail "p" print-person-detail)]
-    (dump (finder id))
+    (tdump (finder id))
     (recur)))
 
 (defn -main [& args]
   (from-name)
   (from-id))
+
