@@ -52,6 +52,22 @@
         finder (case subject \f print-films \p print-persons)]
     (tdump (finder name))))
 
+(defn navigate2
+  [lines]
+  (let [{:keys [id]} (select-row (vec lines))]
+  (let [data (actor-films id)
+        pretty-actor-films (map pretty-actor-film data)]
+    (tdump pretty-actor-films)
+    )))
+
+(defn navigate
+  [lines]
+  (let [{:keys [id]} (select-row (vec lines))]
+  (let [data (characters id)
+        pretty-characters (map pretty-character data)]
+    (tdump pretty-characters)
+    (navigate2 data))))
+
 (defn from-id 
   []
   (println "> Film (f) or Person (p)?")
@@ -64,6 +80,9 @@
     (recur)))
 
 (defn -main [& args]
-  (from-name)
-  (from-id))
+;  (from-name)
+  (let [data (films "Bedford")
+        pretty-films (map pretty-film data)]
+    (tdump pretty-films)
+    (navigate data)))
 

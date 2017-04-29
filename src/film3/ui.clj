@@ -6,15 +6,14 @@
 
 (defn tdump
   [lines]
+  (t/clear term)
   (let [indexed-lines (map-indexed vector lines)]
     (doseq [[row line] indexed-lines]
-      (t/put-string term 1 (+ 2 row) line))
+      (t/put-string term 1 row line))
     (t/redraw term)))
 
 (defn tinchar2
-  [x y]
-  (t/move-cursor term x y)
-  (t/redraw term)
+  []
   (t/get-key-blocking term))
 
 (defn tinchar
@@ -22,8 +21,7 @@
   (t/clear term)
   (t/put-string term 1 0 prompt)
   (t/redraw term)
-  (tinchar2 2 2)
-  )
+  (tinchar2))
 
 (defn tin2
   [x y acc]
@@ -44,8 +42,20 @@
   (t/clear term)
   (t/put-string term 1 0 prompt)
   (t/redraw term)
-  (tin2 2 2 "")
-  )
+  (tin2 2 2 ""))
 
-
-
+(defn select-row
+  [lines]
+  (t/put-string term 1 20 (str (get lines (get (t/get-cursor term) 1))))
+  (t/redraw term)
+  (case (tinchar2)
+    :down (do
+            (t/move-cursor term 0 (+ 1 (get (t/get-cursor term) 1)))
+            (t/redraw term)
+            (recur lines))
+    :up (do
+            (t/move-cursor term 0 (+ -1 (get (t/get-cursor term) 1)))
+            (t/redraw term)
+            (recur lines))
+    :enter (get lines (get (t/get-cursor term) 1))
+    (recur lines)))

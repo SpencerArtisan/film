@@ -18,7 +18,7 @@
 
 (defn pretty-character
   [{:keys [name character id]}]
-  (format "%-40s%-80s%10s" name character id))
+  (format "%10s%-40s%-80s%10s" id name character id))
 
 (defn pretty-actor-film
   [{:keys [release_date title character id]}]
