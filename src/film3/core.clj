@@ -11,22 +11,24 @@
 
 (defn search-type 
   []
-  (case (tinchar "> Film (f) or Person (p)?") \f :film :person))
+  (case (tinchar "> Film (f) or Person (p)?") \f :films :people))
 
 (defn search-word
   [data-type]
   (let [prompt (case data-type :film "> Enter film name" "> Enter person name")]
     (tin prompt)))
 
-(defn searcher
-  [data-type]
-    (case data-type :film search-films-by-title search-people-by-name))
-
 (defn finder
   [data-type]
-    (case data-type :film find-film-by-id :actor-film find-film-by-id find-person-by-id))
+    (case data-type 
+      :film find-film-by-id 
+      :actor-film find-film-by-id 
+      :character find-person-by-id
+      :films search-films-by-title
+      :people search-people-by-name))
 
 (defn pick
+  "given a set of data, returns the id of the selected row, or -1 if Back is selected"
   [data prettifier]
   (let [pretty-data (map prettifier data)]
     (tdump pretty-data)
@@ -34,20 +36,32 @@
     (select-row data)))
 
 (defn navigate
-  [id data-type]
-  (let [data-finder (finder data-type)
+  [stack]
+  (debug3 (first stack))
+  (tinchar2)
+  (let [id (:id (first stack))
+        data-type (:data-type (first stack))
+        data-finder (finder data-type)
         data (data-finder id)
-        sub-data-type (case data-type :film :character :person :actor-film :character :actor-film :actor-film :character)
-        prettifier (case sub-data-type :character pretty-character :actor-film pretty-actor-film :person pretty-person :film pretty-film)
+        sub-data-type (case data-type 
+                        :films :film
+                        :people :person
+                        :film :character 
+                        :person :actor-film 
+                        :character :actor-film 
+                        :actor-film :character)
+        prettifier (case sub-data-type 
+                     :film pretty-film
+                     :person pretty-person 
+                     :character pretty-character 
+                     :actor-film pretty-actor-film)
         new-id (pick data prettifier)]
-    (recur new-id sub-data-type)))
+    (recur (if (= -1 new-id)
+             (if (= 1 (count stack)) stack (rest stack))
+             (cons {:id new-id :data-type sub-data-type} stack)))))
 
 (defn -main [& args]
    (let [data-type (search-type)
-         word (search-word data-type)
-         data-searcher (searcher data-type)
-         data (data-searcher word)
-         prettifier (case data-type :film pretty-film pretty-person)
-         id (pick data prettifier)]
-      (navigate id data-type)))
+         word (search-word data-type)]
+      (navigate [{:id word :data-type data-type}])))
 

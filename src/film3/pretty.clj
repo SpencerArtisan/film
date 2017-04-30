@@ -10,25 +10,24 @@
   (format "%s\n%s - %s\n%s" name birthday deathday biography))
 
 (defn pretty-film
-  [{:keys [title release_date id]}]
-  (format "%-40s%10s%10s" title release_date id))
+  [{:keys [title release_date]}]
+  (format "%-40s%10s" title release_date))
 
 (defn pretty-person
-  [{:keys [name id]}]
-  (format "%-40s%10s" name id))
+  [{:keys [name]}]
+  (format "%-40s" name))
 
 (defn pretty-character
-  [{:keys [name character id]}]
-  (format "%-40s%-80s%10s" name character id))
+  [{:keys [name character]}]
+  (format "%-40s%-80s" name character))
 
 (defn pretty-actor-film
-  [{:keys [release_date title character id]}]
-  (format "%-15s%-45s%-45s%10s" release_date title character id))
+  [{:keys [release_date title character]}]
+  (format "%-15s%-45s%-45s" release_date title character))
 
 (defn pretty-director-film
-  [{:keys [release_date title id]}]
-  (format "%-15s%-30s%10s" release_date title id))
-
+  [{:keys [release_date title]}]
+  (format "%-15s%-30s" release_date title))
 
 (defn prettify 
   [data-type data]

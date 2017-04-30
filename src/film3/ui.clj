@@ -26,15 +26,23 @@
 
 (defn tin2
   [x y acc]
+  (t/move-cursor term x y)
+  (t/redraw term)
   (let [next-key (t/get-key-blocking term)]
-    (if (= :enter next-key) 
-      acc 
-      (do
-        (t/put-string term x y (str next-key))
-        (t/redraw term)
-        (recur (+ 1 x) y (str acc next-key)))
-      )
-  ))
+    (case next-key
+     :enter
+        acc 
+      :backspace
+        (do
+          (t/put-string term (- x 1) y " ")
+          (t/redraw term)
+          (recur (- x 1) y (drop-last acc)))
+      ;default        
+        (do
+          (t/put-string term x y (str next-key))
+          (t/redraw term)
+          (recur (+ x 1) y (str acc next-key)))
+        )))
 
 (defn tin 
   [prompt]
@@ -42,6 +50,7 @@
   (t/put-string term 1 0 prompt)
   (t/redraw term)
   (tin2 2 2 ""))
+
 
 (defn debug
   [& data]
@@ -61,18 +70,32 @@
 (defn select-row
   [lines]
   (let [lines (vec lines)]
-  (debug (get lines (get (t/get-cursor term) 1)))
-  (case (tinchar2)
-    :down (do
-            (t/move-cursor term 0 (+ 1 (get (t/get-cursor term) 1)))
-            (t/redraw term)
-            (recur lines))
-    :up (do
-            (t/move-cursor term 0 (+ -1 (get (t/get-cursor term) 1)))
-            (t/redraw term)
-            (recur lines))
-    :enter (do
-             (str (get (get lines (get (t/get-cursor term) 1)) :id)))
-    (recur lines))))
+    (debug (get lines (get (t/get-cursor term) 1)))
+    (defn down
+      []
+      (t/move-cursor term 0 (+ 1 (get (t/get-cursor term) 1)))
+      (t/redraw term)
+      (select-row lines))
+    (defn up
+      []
+      (t/move-cursor term 0 (+ -1 (get (t/get-cursor term) 1)))
+      (t/redraw term)
+      (select-row lines))
+    (defn select
+      []
+      (str (get (get lines (get (t/get-cursor term) 1)) :id)))
+    (defn back
+      []
+      -1)
 
+    (case (tinchar2)
+      :down (down)
+      \j (down)
+      :up (up)
+      \k (up)
+      :enter (select)
+      :right (select)
+      \l (select)
+      :left (back)
+      \h (back))))
 
