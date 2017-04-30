@@ -8,7 +8,7 @@
 
 (defn find2
   [url]
-  (debug2 url)
+  (debug3 url)
   (tinchar2)
   (clj-http.client/get url {:as :json}))
 
@@ -31,6 +31,10 @@
 (defn director-films
   [person-id]
   (filter #(= "Director" (:job %)) (:crew (:body (find2 (rest-url "person" person-id "movie_credits"))))))
+
+(defn person-credits-by-id
+  [person-id]
+  (vec (concat (find-person-by-id person-id) (director-films person-id))))
 
 (defn film
   [film-id]

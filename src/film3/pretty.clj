@@ -1,5 +1,7 @@
-(ns film3.pretty)
+(ns film3.pretty
+  (:require [film3.ui]))
 
+(refer 'film3.ui)
 
 (defn pretty-film-detail
   [{:keys [title vote_average overview imdb_id]}]
@@ -28,6 +30,10 @@
 (defn pretty-director-film
   [{:keys [release_date title]}]
   (format "%-15s%-30s" release_date title))
+
+(defn pretty-person-film
+  [{character :character :as person}]
+  (if character (pretty-actor-film person) (pretty-actor-film (assoc person :character "Director"))))
 
 (defn prettify 
   [data-type data]

@@ -9,23 +9,10 @@
 (refer 'film3.find)
 (refer 'film3.pretty)
 
-(defn search-type 
-  []
-  (case (tinchar "> Film (f) or Person (p)?") \f :films :people))
-
 (defn search-word
   [data-type]
   (let [prompt (case data-type :film "> Enter film name" "> Enter person name")]
     (tin prompt)))
-
-(defn finder
-  [data-type]
-    (case data-type 
-      :film find-film-by-id 
-      :actor-film find-film-by-id 
-      :character find-person-by-id
-      :films search-films-by-title
-      :people search-people-by-name))
 
 (defn pick
   "given a set of data, returns the id of the selected row, or -1 if Back is selected"
@@ -41,19 +28,27 @@
   (tinchar2)
   (let [id (:id (first stack))
         data-type (:data-type (first stack))
-        data-finder (finder data-type)
+        data-finder (case data-type 
+                       :film find-film-by-id 
+                       :actor-film find-film-by-id 
+                       :person-film person-credits-by-id
+                       :character find-person-by-id
+                       :person person-credits-by-id
+                       :films search-films-by-title
+                       :people search-people-by-name)
         data (data-finder id)
         sub-data-type (case data-type 
                         :films :film
                         :people :person
                         :film :character 
-                        :person :actor-film 
+                        :person :person-film 
                         :character :actor-film 
                         :actor-film :character)
         prettifier (case sub-data-type 
                      :film pretty-film
-                     :person pretty-person 
+                     :person pretty-person
                      :character pretty-character 
+                     :person-film pretty-person-film
                      :actor-film pretty-actor-film)
         new-id (pick data prettifier)]
     (recur (if (= -1 new-id)
@@ -61,7 +56,7 @@
              (cons {:id new-id :data-type sub-data-type} stack)))))
 
 (defn -main [& args]
-   (let [data-type (search-type)
+   (let [data-type (case (tinchar "> Film (f) or Person (p)?") \f :films :people)
          word (search-word data-type)]
       (navigate [{:id word :data-type data-type}])))
 
