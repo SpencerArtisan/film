@@ -3,11 +3,11 @@
 
 (refer 'film3.ui)
 
-(defn pretty-film-detail
+(defn pretty-film-header
   [{:keys [title vote_average overview imdb_id]}]
   (format "%s\nRating: %.1f\n\n%s\n\nhttp://www.imdb.com/title/%s" title (float vote_average) overview imdb_id))
 
-(defn pretty-person-detail
+(defn pretty-person-header
   [{:keys [name birthday deathday biography]}]
   (format "%s\n%s - %s\n%s" name birthday deathday biography))
 

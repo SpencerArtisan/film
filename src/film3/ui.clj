@@ -1,17 +1,38 @@
 (ns film3.ui
   (require [lanterna.screen :as t]))
 
-(def term (t/get-screen))
+(def term (t/get-screen :swing {:cols 160 :rows 50}))
+
 (t/start term)
+
+(defn wrap-line [text]
+  (let [size (get (t/get-size term) 0)]
+    (clojure.pprint/cl-format nil (str "~{~<~%~1," size ":;~A~> ~}") (clojure.string/split text #" "))))
+
+(defn wrap-line2 [text]
+  (mapcat #(clojure.string/split-lines (wrap-line %)) (clojure.string/split-lines text)))
+
+(defn tdump3
+  [lines from-row]
+  (t/move-cursor term 0 from-row)
+  (let [indexed-lines (map-indexed vector lines)]
+    (doseq [[row line] indexed-lines]
+      (t/put-string term 1 (+ row from-row) line))
+    (t/redraw term)))
 
 (defn tdump
   [lines]
   (t/clear term)
-  (t/move-cursor term 0 0)
-  (let [indexed-lines (map-indexed vector lines)]
-    (doseq [[row line] indexed-lines]
-      (t/put-string term 1 row line))
-    (t/redraw term)))
+  (tdump3 lines 0))
+
+(defn tdump2
+  [header lines]
+  (let [header-lines (wrap-line2 header)
+        header-rows (+ 1 (count header-lines))]
+    (tdump header-lines)
+    (t/put-string term 1 (- header-rows 1) "--------------------------------------------------------------------------------------------")
+    (tdump3 lines header-rows)
+    header-rows))
 
 (defn tinchar2
   []
@@ -51,40 +72,35 @@
   (t/redraw term)
   (tin2 2 2 ""))
 
-
 (defn debug
   [& data]
-  (t/put-string term 0 25 (clojure.string/join "/" data))
-  (t/redraw term))
+  ())
 
-(defn debug2
-  [& data]
-  (t/put-string term 0 27 (clojure.string/join "/" data))
-  (t/redraw term))
-
-(defn debug3
-  [& data]
-  (t/put-string term 0 29 (clojure.string/join "/" data))
-  (t/redraw term))
+(defn cursor-y
+  []
+  (get (t/get-cursor term) 1))
 
 (defn select-row
-  [lines]
-  (let [lines (vec lines)]
-    (debug (get lines (get (t/get-cursor term) 1)))
+  [first-row lines]
+  (let [lines (vec lines)
+        last-row (+ first-row (- (count lines) 1))
+        y (min last-row (max (cursor-y) first-row))]
+    (t/move-cursor term 0 y)
+    (t/redraw term)
+    (debug (get lines (- y first-row)))
     (defn down
       []
-      (t/move-cursor term 0 (+ 1 (get (t/get-cursor term) 1)))
+      (t/move-cursor term 0 (+ y 1))
       (t/redraw term)
-      (select-row lines))
+      (select-row first-row lines))
     (defn up
       []
-      (t/move-cursor term 0 (+ -1 (get (t/get-cursor term) 1)))
+      (t/move-cursor term 0 (- y 1))
       (t/redraw term)
-      (select-row lines))
+      (select-row first-row lines))
     (defn select
       []
-      (str (get (get lines (get (t/get-cursor term) 1)) :id)))
-
+      (str (get (get lines (- y first-row)) :id)))
     (case (tinchar2)
       :down (down)
       \j (down)
@@ -95,5 +111,7 @@
       \l (select)
       :left -1
       \h -1
-      :escape nil)))
+      :escape nil
+      (select-row first-row lines))))
+
 
