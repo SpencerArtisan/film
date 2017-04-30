@@ -25,7 +25,6 @@
          [{:id word :data-type data-type}])
        (recur))))
 
-
 (defn navigate
   [stack]
   (debug3 (first stack))

@@ -30,8 +30,8 @@
   (t/redraw term)
   (let [next-key (t/get-key-blocking term)]
     (case next-key
-     :enter
-        acc 
+      :enter
+        (if (empty? acc) (recur x y acc) acc)
       :backspace
         (do
           (t/put-string term (- x 1) y " ")
