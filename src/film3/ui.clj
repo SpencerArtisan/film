@@ -84,9 +84,6 @@
     (defn select
       []
       (str (get (get lines (get (t/get-cursor term) 1)) :id)))
-    (defn back
-      []
-      -1)
 
     (case (tinchar2)
       :down (down)
@@ -96,6 +93,7 @@
       :enter (select)
       :right (select)
       \l (select)
-      :left (back)
-      \h (back))))
+      :left -1
+      \h -1
+      :escape nil)))
 

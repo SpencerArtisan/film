@@ -9,11 +9,6 @@
 (refer 'film3.find)
 (refer 'film3.pretty)
 
-(defn search-word
-  [data-type]
-  (let [prompt (case data-type :film "> Enter film name" "> Enter person name")]
-    (tin prompt)))
-
 (defn pick
   "given a set of data, returns the id of the selected row, or -1 if Back is selected"
   [data prettifier]
@@ -21,6 +16,15 @@
     (tdump pretty-data)
     (debug3 prettifier)
     (select-row data)))
+
+(defn new-search
+  []
+   (let [data-type (case (tinchar "> Film (f) or Person (p)?") \f :films \p :people nil)]
+     (if data-type 
+       (let [word (apply str (tin (case data-type :films "> Enter film name" "> Enter person name")))]
+         [{:id word :data-type data-type}])
+       (recur))))
+
 
 (defn navigate
   [stack]
@@ -51,12 +55,11 @@
                      :person-film pretty-person-film
                      :actor-film pretty-actor-film)
         new-id (pick data prettifier)]
-    (recur (if (= -1 new-id)
-             (if (= 1 (count stack)) stack (rest stack))
+    (recur (case new-id
+             -1 (if (= 1 (count stack)) (new-search) (rest stack))
+             nil (new-search)
              (cons {:id new-id :data-type sub-data-type} stack)))))
 
 (defn -main [& args]
-   (let [data-type (case (tinchar "> Film (f) or Person (p)?") \f :films :people)
-         word (search-word data-type)]
-      (navigate [{:id word :data-type data-type}])))
+  (navigate (new-search)))
 
