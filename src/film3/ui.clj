@@ -7,6 +7,7 @@
 (defn tdump
   [lines]
   (t/clear term)
+  (t/move-cursor term 0 0)
   (let [indexed-lines (map-indexed vector lines)]
     (doseq [[row line] indexed-lines]
       (t/put-string term 1 row line))
@@ -25,8 +26,6 @@
 
 (defn tin2
   [x y acc]
-  (t/move-cursor term x y)
-  (t/redraw term)
   (let [next-key (t/get-key-blocking term)]
     (if (= :enter next-key) 
       acc 
@@ -44,10 +43,25 @@
   (t/redraw term)
   (tin2 2 2 ""))
 
+(defn debug
+  [& data]
+  (t/put-string term 0 25 (clojure.string/join "/" data))
+  (t/redraw term))
+
+(defn debug2
+  [& data]
+  (t/put-string term 0 27 (clojure.string/join "/" data))
+  (t/redraw term))
+
+(defn debug3
+  [& data]
+  (t/put-string term 0 29 (clojure.string/join "/" data))
+  (t/redraw term))
+
 (defn select-row
   [lines]
-  (t/put-string term 1 20 (str (get lines (get (t/get-cursor term) 1))))
-  (t/redraw term)
+  (let [lines (vec lines)]
+  (debug (get lines (get (t/get-cursor term) 1)))
   (case (tinchar2)
     :down (do
             (t/move-cursor term 0 (+ 1 (get (t/get-cursor term) 1)))
@@ -57,5 +71,8 @@
             (t/move-cursor term 0 (+ -1 (get (t/get-cursor term) 1)))
             (t/redraw term)
             (recur lines))
-    :enter (get lines (get (t/get-cursor term) 1))
-    (recur lines)))
+    :enter (do
+             (str (get (get lines (get (t/get-cursor term) 1)) :id)))
+    (recur lines))))
+
+

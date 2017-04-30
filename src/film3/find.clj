@@ -1,26 +1,30 @@
 (ns film3.find
   (:require [clj-http.client])
+  (:require [film3.ui])
   (:require [film3.urls]))
 
 (refer 'film3.urls)
+(refer 'film3.ui)
 
 (defn find2
   [url]
+  (debug2 url)
+  (tinchar2)
   (clj-http.client/get url {:as :json}))
 
-(defn films
+(defn search-films-by-title
   [title]
   (:results (:body (find2 (search-url "movie" title)))))
 
-(defn people
+(defn search-people-by-name
   [name]
   (:results (:body (find2 (search-url "person" name)))))
 
-(defn characters
+(defn find-film-by-id
   [film-id]
   (take 8 (:cast (:body (find2 (rest-url "movie" film-id "credits"))))))
 
-(defn actor-films
+(defn find-person-by-id
   [person-id]
   (:cast (:body (find2 (rest-url "person" person-id "movie_credits")))))
 
