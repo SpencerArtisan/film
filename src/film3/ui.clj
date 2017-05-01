@@ -91,45 +91,38 @@
   ())
   ;(t/put-string term 0 0 (str data)) (t/redraw term))
 
+;(start)
 ;(select-row ["hello" "there"] ["0" "1" "2" "3" "4" "5" "6" "7"] [0 1 2 3 4 5 6 7] 2 2)
 (defn select-row
-  [header-lines pretty-lines lines offset selection-index]
-  (let [lines (vec lines)
-        header-rows (+ 1 (count header-lines))
-        data-rows (count lines)
+  [header-lines data-lines data-ids offset selection-index]
+  (let [data-lines (vec data-lines)
+        data-ids (vec data-ids)
+        header-line-count (+ 1 (count header-lines))
+        data-line-count (count data-lines)
         max-cursor-y (- (rows) 1)
-        max-selection-index (+ offset (- (rows) header-rows))
-        selection-index (min (- data-rows 1) (max 0 selection-index))
+        max-selection-index (+ offset (- (rows) header-line-count))
+        selection-index (min (- data-line-count 1) (max 0 selection-index))
         offset (max (- (+ 2 offset selection-index) max-selection-index) (min offset selection-index))
-        new-cursor-y (+ (- selection-index offset) header-rows)
-        ]
+        new-cursor-y (+ (- selection-index offset) header-line-count)
+        selected-item-id (get data-ids selection-index)]
     (t/move-cursor term 0 new-cursor-y)
-    (present header-lines (drop offset pretty-lines))
-    (debug (nth lines selection-index))
+    (present header-lines (drop offset data-lines))
+    (debug selected-item-id)
     (defn move-vertical
       [delta-y]
-      (select-row header-lines pretty-lines lines offset (+ selection-index delta-y)))
-    (defn down
-      []
-      (move-vertical 1))
-    (defn up
-      []
-      (move-vertical -1))
-    (defn select
-      []
-      (str (:id (get lines selection-index))))
+      (select-row header-lines data-lines data-ids offset (+ selection-index delta-y)))
     (case (input-char)
-      :down (down)
-      \j (down)
-      :up (up)
-      \k (up)
-      :enter (select)
-      :right (select)
-      \l (select)
+      :down (move-vertical 1)
+      \j (move-vertical 1)
+      :up (move-vertical -1)
+      \k (move-vertical -1)
+      :enter selected-item-id
+      :right selected-item-id
+      \l selected-item-id
       :left -1
       \h -1
       :escape nil
       \q nil
-      (select-row header-lines pretty-lines lines offset selection-index))))
+      (recur header-lines data-lines data-ids offset selection-index))))
 
 

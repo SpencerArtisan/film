@@ -11,11 +11,11 @@
 
 (defn pick
   "given a set of data, returns the id of the selected row, or -1 if Back is selected"
-  [header data prettifier header-prettifier]
-  (let [pretty-data (map prettifier data)
-        pretty-header (header-prettifier header)
-        header-lines (wrap-paragraph pretty-header)]
-    (select-row header-lines pretty-data data 0 0)))
+  [header header-prettifier data data-prettifier]
+  (let [data-lines (map data-prettifier data)
+        header-lines (wrap-paragraph (header-prettifier header))
+        data-ids (map :id data)]
+    (select-row header-lines data-lines data-ids 0 0)))
 
 (defn new-search
   []
@@ -31,7 +31,7 @@
   [stack]
   (when-not (empty? stack)
     (debug (first stack))
-    (output ["Please wait...                                      "] 0 :default)
+    (output ["Please wait...                "] 0 :default)
     (refresh)
     (let [id (:id (first stack))
           data-type (:data-type (first stack))
@@ -46,7 +46,7 @@
                           :person :person-role
                           :film-participant :person-role
                           :person-role :film-participant)
-          prettifier (case data-type 
+          data-prettifier (case data-type 
                        :film pretty-film
                        :person pretty-person
                        :film-participant pretty-participant
@@ -55,7 +55,7 @@
                               :film-participant pretty-film-header
                               :person-role pretty-person-header
                               str)
-          new-id (pick header data prettifier header-prettifier)]
+          new-id (pick header header-prettifier data data-prettifier)]
       (recur (case new-id
                -1 (if (= 1 (count stack)) (new-search) (rest stack))
                nil (new-search)
