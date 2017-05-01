@@ -9,7 +9,7 @@
 
 (defn pretty-person-header
   [{:keys [name birthday deathday biography]}]
-  (format "%s\n%s - %s\n%s" name birthday deathday (clojure.string/replace biography "From Wikipedia, the free encyclopedia. " "")))
+  (format "%s\n%s - %s\n%s" name birthday deathday (if biography (clojure.string/replace biography "From Wikipedia, the free encyclopedia. " ""))))
 
 (defn pretty-film
   [{:keys [title release_date]}]

@@ -1,9 +1,13 @@
 (ns film3.ui
   (require [lanterna.screen :as t]))
 
-(def term (t/get-screen :swing {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
+(def term (t/get-screen :auto {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
 
 (t/start term)
+
+(defn tquit
+ []
+ (t/stop term))
 
 (defn wrap-line [text]
   (let [size (- (get (t/get-size term) 0) 1)]
@@ -75,8 +79,8 @@
 
 (defn debug
   [& data]
-;  ())
-  (t/put-string term 0 0 (str data)) (t/redraw term))
+  ())
+;  (t/put-string term 0 0 (str data)) (t/redraw term))
 
 (defn cursor-y
   []
