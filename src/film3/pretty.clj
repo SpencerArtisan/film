@@ -1,7 +1,4 @@
-(ns film3.pretty
-  (:require [film3.ui]))
-
-(refer 'film3.ui)
+(ns film3.pretty)
 
 (defn pretty-film-header
   [{:keys [title imdbRating overview imdb_id]}]
@@ -33,6 +30,5 @@
 
 (defn pretty-person-role
   [{character :character :as person}]
-  (debug person)
   (if character (pretty-actor-film person) (pretty-actor-film (assoc person :character "Director"))))
 

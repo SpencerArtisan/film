@@ -5,6 +5,10 @@
 
 (def ^:private api-key "api_key=9f2001c43f5a2d845c5f0ea8689caef5")
 
+(defn imdb-data-url
+  [imdb-id]
+  (str "http://www.omdbapi.com/?i=" imdb-id))
+
 (defn rest-url
   "Build a url for a restful resource"
   [& parts]

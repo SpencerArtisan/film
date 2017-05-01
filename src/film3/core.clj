@@ -38,8 +38,8 @@
           data-finder (case data-type 
                          :film search-films-by-title
                          :person search-people-by-name
-                         :film-participant find-film-by-id
-                         :person-role find-person-roles-by-id)
+                         :film-participant find-film-and-participants
+                         :person-role find-person-and-roles)
           {:keys [data header]} (data-finder id)
           sub-data-type (case data-type 
                           :film :film-participant

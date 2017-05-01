@@ -2,7 +2,8 @@
   (require [clojure.string :as string])
   (require [lanterna.screen :as t]))
 
-(def term (t/get-screen :text {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
+(def term 
+  (t/get-screen :text {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
 
 (defn start
   []
@@ -30,11 +31,11 @@
 
 (defn wrap-paragraph 
   [paragraph]
-  (let [size (- (columns) 1)
+  (let [length (- (columns) 1)
         split-on-newlines (string/split-lines paragraph)]
     (defn wrap-line 
       [text]
-      (clojure.pprint/cl-format nil (str "~{~<~%~1," size ":;~A~> ~}") (string/split text #" ")))
+      (clojure.pprint/cl-format nil (str "~{~<~%~1," length ":;~A~> ~}") (string/split text #" ")))
     (mapcat #(string/split-lines (wrap-line %)) split-on-newlines)))
 
 (defn output
@@ -68,7 +69,7 @@
     [x y acc]
     (t/move-cursor term x y)
     (refresh)
-    (let [next-key (t/get-key-blocking term)]
+    (let [next-key (input-char)]
       (case next-key
         :enter
           (if (empty? acc) (recur x y acc) (doall acc))
