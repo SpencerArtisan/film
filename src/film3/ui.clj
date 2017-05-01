@@ -1,12 +1,12 @@
 (ns film3.ui
   (require [lanterna.screen :as t]))
 
-(def term (t/get-screen :swing {:cols 160 :rows 50}))
+(def term (t/get-screen :swing {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
 
 (t/start term)
 
 (defn wrap-line [text]
-  (let [size (get (t/get-size term) 0)]
+  (let [size (- (get (t/get-size term) 0) 1)]
     (clojure.pprint/cl-format nil (str "~{~<~%~1," size ":;~A~> ~}") (clojure.string/split text #" "))))
 
 (defn wrap-line2 [text]
@@ -30,7 +30,7 @@
   (let [header-lines (wrap-line2 header)
         header-rows (+ 1 (count header-lines))]
     (tdump header-lines)
-    (t/put-string term 1 (- header-rows 1) "--------------------------------------------------------------------------------------------")
+    (t/put-string term 0 (- header-rows 1) (apply str (replicate 200 \-)))
     (tdump3 lines header-rows)
     header-rows))
 
@@ -42,6 +42,7 @@
   [prompt]
   (t/clear term)
   (t/put-string term 1 0 prompt)
+  (t/move-cursor term (+ 2 (count prompt)) 0)
   (t/redraw term)
   (tinchar2))
 
@@ -52,7 +53,7 @@
   (let [next-key (t/get-key-blocking term)]
     (case next-key
       :enter
-        (if (empty? acc) (recur x y acc) acc)
+        (if (empty? acc) (recur x y acc) (doall acc))
       :backspace
         (do
           (t/put-string term (- x 1) y " ")
@@ -70,11 +71,12 @@
   (t/clear term)
   (t/put-string term 1 0 prompt)
   (t/redraw term)
-  (tin2 2 2 ""))
+  (tin2 (+ 2 (count prompt)) 0 ""))
 
 (defn debug
   [& data]
-  ())
+;  ())
+  (t/put-string term 0 0 (str data)) (t/redraw term))
 
 (defn cursor-y
   []

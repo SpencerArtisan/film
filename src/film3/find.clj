@@ -10,9 +10,13 @@
   [url]
   (clj-http.client/get url {:as :json}))
 
+(defn director-filter
+  [crew]
+  (filter #(= "Director" (:job %)) crew))
+
 (defn search-films-by-title
   [title]
-  {:header (str "Films containing '" title "'") :data (:results (:body (find2 (search-url "movie" title))))})
+  {:header (str "Films containing '" title "'") :data (reverse (sort-by :release_date (:results (:body (find2 (search-url "movie" title))))))})
 
 (defn search-people-by-name
   [name]
@@ -28,17 +32,21 @@
 
 (defn find-film-by-id
   [film-id]
-  {:header (film film-id) :data (take 8 (:cast (:body (find2 (rest-url "movie" film-id "credits")))))})
+  (let [body (:body (find2 (rest-url "movie" film-id "credits")))]
+    {:header (film film-id) :data (concat (director-filter (:crew body)) (:cast body))}))
 
 (defn find-person-by-id
   [person-id]
-  {:header (person person-id) :data (:cast (:body (find2 (rest-url "person" person-id "movie_credits"))))})
+  {:header (person person-id) :data (reverse (sort-by :release_date (:cast (:body (find2 (rest-url "person" person-id "movie_credits"))))))})
 
 (defn director-films
   [person-id]
-  {:header (person person-id) :data (filter #(= "Director" (:job %)) (:crew (:body (find2 (rest-url "person" person-id "movie_credits")))))})
+  {:header (person person-id) :data (reverse (sort-by :release_date (director-filter (:crew (:body (find2 (rest-url "person" person-id "movie_credits")))))))})
 
-(defn person-credits-by-id
+(defn find-person-roles-by-id
   [person-id]
-  {:header (person person-id) :data (vec (concat (find-person-by-id person-id) (director-films person-id)))})
+  (let [acting (find-person-by-id person-id)
+        directing (director-films person-id)]
+    {:header (:header acting) :data (reverse (sort-by :release_date (vec (concat (:data acting) (:data directing)))))}))
+
 

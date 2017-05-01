@@ -19,44 +19,36 @@
 
 (defn new-search
   []
-  (let [data-type (case (tinchar "> Film (f) or Person (p)?") \f :films \p :people nil)]
+  (let [data-type (case (tinchar "Film (f) or Person (p)?") \f :film \p :person nil)]
      (if data-type 
-       (let [word (apply str (tin (case data-type :films "> Enter film name" "> Enter person name")))]
+       (let [word (apply str (tin (case data-type :film "Enter film name..." "Enter person name...")))]
          [{:id word :data-type data-type}])
        (recur))))
 
 (defn navigate
   [stack]
+  (debug (first stack))
   (let [id (:id (first stack))
         data-type (:data-type (first stack))
         data-finder (case data-type 
-                       :film find-film-by-id 
-                       :actor-film find-film-by-id 
-                       :person-film person-credits-by-id
-                       :character find-person-by-id
-                       :person person-credits-by-id
-                       :films search-films-by-title
-                       :people search-people-by-name)
+                       :film search-films-by-title
+                       :person search-people-by-name
+                       :film-participant find-film-by-id
+                       :person-role find-person-roles-by-id)
         {:keys [data header]} (data-finder id)
         sub-data-type (case data-type 
-                        :films :film
-                        :people :person
-                        :film :character 
-                        :person :person-film 
-                        :character :actor-film 
-                        :actor-film :character)
-        prettifier (case sub-data-type 
+                        :film :film-participant
+                        :person :person-role
+                        :film-participant :person-role
+                        :person-role :film-participant)
+        prettifier (case data-type 
                      :film pretty-film
                      :person pretty-person
-                     :character pretty-character 
-                     :person-film pretty-person-film
-                     :actor-film pretty-actor-film)
+                     :film-participant pretty-participant
+                     :person-role pretty-person-role)
         header-prettifier (case data-type
-                            :film pretty-film-header
-                            :actor-film pretty-film-header
-                            :person-film pretty-person-header
-                            :person pretty-person-header
-                            :character pretty-person-header
+                            :film-participant pretty-film-header
+                            :person-role pretty-person-header
                             str)
         new-id (pick header data prettifier header-prettifier)]
     (recur (case new-id
