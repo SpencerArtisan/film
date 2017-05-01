@@ -1,98 +1,97 @@
 (ns film3.ui
+  (require [clojure.string :as string])
   (require [lanterna.screen :as t]))
 
 (def term (t/get-screen :text {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
 
-(t/start term)
+(defn start
+  []
+  (t/start term))
 
-(defn tquit
+(defn quit
  []
  (t/stop term))
 
+(defn refresh
+  []
+  (t/redraw term))
+
+(defn cursor-y
+  []
+  (second (t/get-cursor term)))
+
 (defn columns
   []
-  (get (t/get-size term) 0))
+  (first (t/get-size term)))
 
 (defn rows
   []
-  (get (t/get-size term) 1))
+  (second (t/get-size term)))
 
-(defn wrap-line [text]
-  (let [size (- (get (t/get-size term) 0) 1)]
-    (clojure.pprint/cl-format nil (str "~{~<~%~1," size ":;~A~> ~}") (clojure.string/split text #" "))))
+(defn wrap-paragraph 
+  [paragraph]
+  (let [size (- (columns) 1)
+        split-on-newlines (string/split-lines paragraph)]
+    (defn wrap-line 
+      [text]
+      (clojure.pprint/cl-format nil (str "~{~<~%~1," size ":;~A~> ~}") (string/split text #" ")))
+    (mapcat #(string/split-lines (wrap-line %)) split-on-newlines)))
 
-(defn wrap-line2 [text]
-  (mapcat #(clojure.string/split-lines (wrap-line %)) (clojure.string/split-lines text)))
-
-(defn tdump3
+(defn output
   [lines from-row color]
-  (let [indexed-lines (map-indexed vector lines)]
-    (doseq [[row line] indexed-lines]
-      (t/put-string term 1 (+ row from-row) line {:fg color}))))
+  (when-not (empty? lines)
+    (t/put-string term 1 from-row (first lines) {:fg color})
+    (recur (rest lines) (+ 1 from-row) color)))
 
-(defn tdump
-  [lines color]
-  (t/clear term)
-  (tdump3 lines 0 color))
-
-(defn tdump2
-  [header-lines lines]
+(defn present
+  [header-lines data-lines]
   (let [header-rows (+ 1 (count header-lines))]
-    (tdump header-lines :default)
+    (t/clear term)
+    (output header-lines 0 :default)
     (t/put-string term 0 (- header-rows 1) (apply str (replicate 200 \-)) {:fg :white})
-    (tdump3 lines header-rows :blue)
-    (t/redraw term)))
+    (output data-lines header-rows :blue)
+    (refresh)))
 
-(defn tinchar2
-  []
-  (t/get-key-blocking term))
+(defn input-char
+  ([prompt]
+    (t/clear term)
+    (t/put-string term 1 0 prompt)
+    (t/move-cursor term (+ 2 (count prompt)) 0)
+    (refresh)
+    (input-char))
+  ([]
+    (t/get-key-blocking term)))
 
-(defn tinchar
+(defn input-string
   [prompt]
+  (defn input-accumulator
+    [x y acc]
+    (t/move-cursor term x y)
+    (refresh)
+    (let [next-key (t/get-key-blocking term)]
+      (case next-key
+        :enter
+          (if (empty? acc) (recur x y acc) (doall acc))
+        :backspace
+          (do
+            (t/put-string term (- x 1) y " ")
+            (recur (- x 1) y (drop-last acc)))
+        ;default        
+          (do
+            (t/put-string term x y (str next-key))
+            (recur (+ x 1) y (str acc next-key)))
+          )))
   (t/clear term)
   (t/put-string term 1 0 prompt)
-  (t/move-cursor term (+ 2 (count prompt)) 0)
-  (t/redraw term)
-  (tinchar2))
-
-(defn tin2
-  [x y acc]
-  (t/move-cursor term x y)
-  (t/redraw term)
-  (let [next-key (t/get-key-blocking term)]
-    (case next-key
-      :enter
-        (if (empty? acc) (recur x y acc) (doall acc))
-      :backspace
-        (do
-          (t/put-string term (- x 1) y " ")
-          (t/redraw term)
-          (recur (- x 1) y (drop-last acc)))
-      ;default        
-        (do
-          (t/put-string term x y (str next-key))
-          (t/redraw term)
-          (recur (+ x 1) y (str acc next-key)))
-        )))
-
-(defn tin 
-  [prompt]
-  (t/clear term)
-  (t/put-string term 1 0 prompt)
-  (t/redraw term)
-  (tin2 (+ 2 (count prompt)) 0 ""))
+  (refresh)
+  (input-accumulator (+ 2 (count prompt)) 0 ""))
 
 (defn debug
   [& data]
   ())
   ;(t/put-string term 0 0 (str data)) (t/redraw term))
 
-(defn cursor-y
-  []
-  (get (t/get-cursor term) 1))
-
 ;(select-row ["hello" "there"] ["0" "1" "2" "3" "4" "5" "6" "7"] [0 1 2 3 4 5 6 7] 2 2)
-
 (defn select-row
   [header-lines pretty-lines lines offset selection-index]
   (let [lines (vec lines)
@@ -105,9 +104,8 @@
         new-cursor-y (+ (- selection-index offset) header-rows)
         ]
     (t/move-cursor term 0 new-cursor-y)
-    (tdump2 header-lines (drop offset pretty-lines))
-;    (debug offset selection-index max-selection-index new-cursor-y max-cursor-y)
-    (debug (get lines selection-index))
+    (present header-lines (drop offset pretty-lines))
+    (debug (nth lines selection-index))
     (defn move-vertical
       [delta-y]
       (select-row header-lines pretty-lines lines offset (+ selection-index delta-y)))
@@ -119,8 +117,8 @@
       (move-vertical -1))
     (defn select
       []
-      (str (get (get lines selection-index) :id)))
-    (case (tinchar2)
+      (str (:id (get lines selection-index))))
+    (case (input-char)
       :down (down)
       \j (down)
       :up (up)

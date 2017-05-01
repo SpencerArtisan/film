@@ -14,14 +14,14 @@
   [header data prettifier header-prettifier]
   (let [pretty-data (map prettifier data)
         pretty-header (header-prettifier header)
-        header-lines (wrap-line2 pretty-header)]
+        header-lines (wrap-paragraph pretty-header)]
     (select-row header-lines pretty-data data 0 0)))
 
 (defn new-search
   []
-  (let [data-type (case (tinchar "Film (f), Person (p) or Quit (q)?") \f :film \p :person \q :quit nil)
+  (let [data-type (case (input-char "Film (f), Person (p) or Quit (q)?") \f :film \p :person \q :quit nil)
         prompt (case data-type :film "Enter film name..." :person "Enter person name..." nil)
-        word (if prompt (apply str (tin prompt)))]
+        word (if prompt (apply str (input-string prompt)))]
     (case data-type
       :quit []
       nil (recur)
@@ -29,10 +29,10 @@
 
 (defn navigate
   [stack]
-  (if (not (empty? stack)) 
-   (do 
+  (when-not (empty? stack)
     (debug (first stack))
-    (tdump ["Please wait..."] :default)
+    (output ["Please wait...                                      "] 0 :default)
+    (refresh)
     (let [id (:id (first stack))
           data-type (:data-type (first stack))
           data-finder (case data-type 
@@ -59,9 +59,11 @@
       (recur (case new-id
                -1 (if (= 1 (count stack)) (new-search) (rest stack))
                nil (new-search)
-               (cons {:id new-id :data-type sub-data-type} stack)))))))
+               (cons {:id new-id :data-type sub-data-type} stack))))))
 
-(defn -main [& args]
+(defn -main 
+  [& args]
+  (start)
   (navigate (if (empty? args) (new-search) [{:id (first args) :data-type :film}]))
-  (tquit))
+  (quit))
 
