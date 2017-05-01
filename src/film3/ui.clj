@@ -72,7 +72,7 @@
     (let [next-key (input-char)]
       (case next-key
         :enter
-          (if (empty? acc) (recur x y acc) (doall acc))
+          (if (empty? acc) (recur x y acc) (apply str acc))
         :backspace
           (do
             (t/put-string term (- x 1) y " ")

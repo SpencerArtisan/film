@@ -10,7 +10,6 @@
 (refer 'film3.pretty)
 
 (defn pick
-  "given a set of data, returns the id of the selected row, or -1 if Back is selected"
   [header header-prettifier data data-prettifier]
   (let [data-lines (map data-prettifier data)
         header-lines (wrap-paragraph (header-prettifier header))
@@ -20,12 +19,11 @@
 (defn new-search
   []
   (let [data-type (case (input-char "Film (f), Person (p) or Quit (q)?") \f :film \p :person \q :quit nil)
-        prompt (case data-type :film "Enter film name..." :person "Enter person name..." nil)
-        word (if prompt (apply str (input-string prompt)))]
+        prompt (case data-type :film "Enter film name..." :person "Enter person name..." nil)]
     (case data-type
       :quit []
       nil (recur)
-      [{:id word :data-type data-type}])))
+      [{:id (input-string prompt) :data-type data-type}])))
 
 (defn navigate
   [stack]
@@ -40,7 +38,6 @@
                          :person search-people-by-name
                          :film-participant find-film-and-participants
                          :person-role find-person-and-roles)
-          {:keys [data header]} (data-finder id)
           sub-data-type (case data-type 
                           :film :film-participant
                           :person :person-role
@@ -55,6 +52,7 @@
                               :film-participant pretty-film-header
                               :person-role pretty-person-header
                               str)
+          {:keys [header data]} (data-finder id)
           new-id (pick header header-prettifier data data-prettifier)]
       (recur (case new-id
                -1 (if (= 1 (count stack)) (new-search) (rest stack))
