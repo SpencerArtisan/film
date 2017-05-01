@@ -4,12 +4,12 @@
 (refer 'film3.ui)
 
 (defn pretty-film-header
-  [{:keys [title vote_average overview imdb_id]}]
-  (format "%s\nRating: %.1f\n\n%s\n\nhttp://www.imdb.com/title/%s" title (float vote_average) overview imdb_id))
+  [{:keys [title imdbRating overview imdb_id]}]
+  (format "%s\nRating: %s\n\n%s\n\nhttp://www.imdb.com/title/%s" title imdbRating overview imdb_id))
 
 (defn pretty-person-header
   [{:keys [name birthday deathday biography]}]
-  (format "%s\n%s - %s\n%s" name birthday deathday (if biography (clojure.string/replace biography "From Wikipedia, the free encyclopedia. " ""))))
+  (format "%s\n%s - %s\n%s" name (or birthday "") (or deathday "") (if biography (clojure.string/replace biography "From Wikipedia, the free encyclopedia. " "") "")))
 
 (defn pretty-film
   [{:keys [title release_date]}]

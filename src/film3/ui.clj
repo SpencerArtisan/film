@@ -1,7 +1,7 @@
 (ns film3.ui
   (require [lanterna.screen :as t]))
 
-(def term (t/get-screen :auto {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
+(def term (t/get-screen :text {:cols 160 :rows 50 :font "Lucinda" :font-size 10}))
 
 (t/start term)
 
@@ -17,26 +17,28 @@
   (mapcat #(clojure.string/split-lines (wrap-line %)) (clojure.string/split-lines text)))
 
 (defn tdump3
-  [lines from-row]
+  [lines from-row color]
   (t/move-cursor term 0 from-row)
   (let [indexed-lines (map-indexed vector lines)]
     (doseq [[row line] indexed-lines]
-      (t/put-string term 1 (+ row from-row) line))
+      (t/put-string term 1 (+ row from-row) line {:fg color}))
     (t/redraw term)))
 
 (defn tdump
-  [lines]
+  [lines color]
   (t/clear term)
-  (tdump3 lines 0))
+  (tdump3 lines 0 color))
 
 (defn tdump2
   [header lines]
   (let [header-lines (wrap-line2 header)
         header-rows (+ 1 (count header-lines))]
-    (tdump header-lines)
-    (t/put-string term 0 (- header-rows 1) (apply str (replicate 200 \-)))
-    (tdump3 lines header-rows)
+    (tdump header-lines :black)
+    (t/put-string term 0 (- header-rows 1) (apply str (replicate 200 \-)) {:fg :white})
+    (tdump3 lines header-rows :blue)
     header-rows))
+
+(tdump2 "hello" ["world"])
 
 (defn tinchar2
   []

@@ -32,7 +32,7 @@
   (if (not (empty? stack)) 
    (do 
     (debug (first stack))
-    (tdump ["Please wait..."])
+    (tdump ["Please wait..."] :default)
     (let [id (:id (first stack))
           data-type (:data-type (first stack))
           data-finder (case data-type 

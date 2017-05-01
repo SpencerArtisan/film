@@ -10,6 +10,10 @@
   [url]
   (clj-http.client/get url {:as :json}))
 
+(defn find-extra-film-detail
+  [imdb-id]
+  (:body (find2 (str "http://www.omdbapi.com/?i=" imdb-id))))
+
 (defn director-filter
   [crew]
   (filter #(= "Director" (:job %)) crew))
@@ -32,8 +36,11 @@
 
 (defn find-film-by-id
   [film-id]
-  (let [body (:body (find2 (rest-url "movie" film-id "credits")))]
-    {:header (film film-id) :data (concat (director-filter (:crew body)) (:cast body))}))
+  (let [body (:body (find2 (rest-url "movie" film-id "credits")))
+        film-detail (film film-id)
+        extra-detail (find-extra-film-detail (:imdb_id film-detail))
+        combined-detail (merge film-detail extra-detail)]
+    {:header combined-detail :data (concat (director-filter (:crew body)) (:cast body))}))
 
 (defn find-person-by-id
   [person-id]
@@ -48,5 +55,4 @@
   (let [acting (find-person-by-id person-id)
         directing (director-films person-id)]
     {:header (:header acting) :data (reverse (sort-by :release_date (vec (concat (:data acting) (:data directing)))))}))
-
 
