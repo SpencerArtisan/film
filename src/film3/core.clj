@@ -14,8 +14,8 @@
   [header data prettifier header-prettifier]
   (let [pretty-data (map prettifier data)
         pretty-header (header-prettifier header)
-        header-rows (tdump2 pretty-header pretty-data)]
-    (select-row header-rows data)))
+        header-lines (wrap-line2 pretty-header)]
+    (select-row header-lines pretty-data data 0 0)))
 
 (defn new-search
   []
@@ -62,6 +62,6 @@
                (cons {:id new-id :data-type sub-data-type} stack)))))))
 
 (defn -main [& args]
-  (navigate (new-search))
+  (navigate (if (empty? args) (new-search) [{:id (first args) :data-type :film}]))
   (tquit))
 
